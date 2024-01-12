@@ -1,8 +1,17 @@
+import 'package:args/command_runner.dart';
 import 'package:cider/src/cli/command/cider_command.dart';
+import 'package:cider/src/cli/command/log_sub_command.dart';
 import 'package:cider/src/project.dart';
 
 class LogCommand extends CiderCommand {
-  LogCommand(super.printer);
+  LogCommand(super.printer) {
+    addSubcommand(LogSubCommand.add(printer));
+    addSubcommand(LogSubCommand.fix(printer));
+    addSubcommand(LogSubCommand.change(printer));
+    addSubcommand(LogSubCommand.deprecate(printer));
+    addSubcommand(LogSubCommand.remove(printer));
+    addSubcommand(LogSubCommand.security(printer));
+  }
 
   @override
   final name = 'log';
@@ -12,7 +21,7 @@ class LogCommand extends CiderCommand {
 
   @override
   Future<int> exec(Project project) async {
-    await project.addUnreleased(argResults!.rest.first, argResults!.rest[1]);
-    return 0;
+    throw UsageException(
+        'Log command can only be used with subcommands', usage);
   }
 }
