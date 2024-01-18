@@ -34,9 +34,12 @@ abstract class CiderCommand extends Command<int> {
         config.read<String>('/link_template/tag', orElse: () => '');
     final keepEmptyUnreleased =
         config.read<bool>('/keep_empty_unreleased', orElse: () => false);
+    final tagTemplate =
+        config.read<String>('/git_template/tag', orElse: () => '%tag%');
     return Config(
         diffTemplate: diffTemplate,
         tagLinkTemplate: tagLinkTemplate,
+        tagTemplate: tagTemplate,
         keepEmptyUnreleased: keepEmptyUnreleased);
   }
 }

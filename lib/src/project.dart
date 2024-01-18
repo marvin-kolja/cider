@@ -120,7 +120,8 @@ class Project {
       if (parent != null && _config.diffTemplate.isNotEmpty) {
         release.link = _config.diffTemplate.render(parent.version, version);
       } else if (_config.tagLinkTemplate.isNotEmpty) {
-        release.link = _config.tagLinkTemplate.render(version);
+        final tag = _config.tagTemplate.render(version);
+        release.link = _config.tagLinkTemplate.render(tag);
       }
       log.add(release);
       log.unreleased.clear();
