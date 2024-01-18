@@ -4,14 +4,14 @@ import 'package:cider/src/template/tag.dart';
 class Config {
   Config(
       {String diffTemplate = '',
-      String tagTemplate = '',
+      String tagLinkTemplate = '',
       this.keepEmptyUnreleased = false,
       this.changelogNewline = true})
       : diffTemplate = Diff(diffTemplate),
-        tagTemplate = Tag(tagTemplate);
+        tagLinkTemplate = Tag(tagLinkTemplate);
 
   final Diff diffTemplate;
-  final Tag tagTemplate;
+  final Tag tagLinkTemplate;
   final bool keepEmptyUnreleased;
   final bool changelogNewline;
 }

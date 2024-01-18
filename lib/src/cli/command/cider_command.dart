@@ -30,13 +30,13 @@ abstract class CiderCommand extends Command<int> {
     final config = pubspec.read<Map>('/cider', orElse: () => {});
     final diffTemplate =
         config.read<String>('/link_template/diff', orElse: () => '');
-    final tagTemplate =
+    final tagLinkTemplate =
         config.read<String>('/link_template/tag', orElse: () => '');
     final keepEmptyUnreleased =
         config.read<bool>('/keep_empty_unreleased', orElse: () => false);
     return Config(
         diffTemplate: diffTemplate,
-        tagTemplate: tagTemplate,
+        tagLinkTemplate: tagLinkTemplate,
         keepEmptyUnreleased: keepEmptyUnreleased);
   }
 }
