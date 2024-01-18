@@ -9,7 +9,22 @@ class LogSubCommand extends CiderCommand {
     required this.description,
     required Console printer,
   })  : type = type ?? name,
-        super(printer);
+        super(printer) {
+    argParser
+      ..addFlag('commit', help: 'Commit the log entry.', defaultsTo: false)
+      ..addOption(
+        'commit-scope',
+        help: 'Commit scope.',
+        defaultsTo: 'cli',
+        allowed: ['cli', 'staged', 'all'],
+        allowedHelp: {
+          'cli':
+              'Commit only changes made by the CLI.\nIf there are other changes in the pubspec.yaml file other than the version they will be ignored.',
+          'staged': 'Commit staged files and changes made by the CLI.',
+          'all': 'Commit all changes. This adds files to the index.',
+        },
+      );
+  }
 
   factory LogSubCommand.add(Console printer) => LogSubCommand(
         'add',
@@ -57,7 +72,13 @@ class LogSubCommand extends CiderCommand {
 
   @override
   Future<int> exec(Project project) async {
-    await project.addUnreleased(type, argResults!.rest[0]);
+    final description = argResults!.rest[0];
+    await project.addUnreleased(type, description);
+    final shouldCommit = argResults!['commit'] as bool;
+    if (shouldCommit) {
+      final commitScope = argResults!['commit-scope'] as String;
+      await project.commitLog(type, description, scope: commitScope);
+    }
 
     return 0;
   }

@@ -36,10 +36,17 @@ abstract class CiderCommand extends Command<int> {
         config.read<bool>('/keep_empty_unreleased', orElse: () => false);
     final tagTemplate =
         config.read<String>('/git_template/tag', orElse: () => '%tag%');
+    final releaseCommitTemplate = config.read<String>(
+        '/git_template/commit/release',
+        orElse: () => 'Release %tag%');
+    final logCommitTemplate = config.read<String>('/git_template/commit/log',
+        orElse: () => '%type%: %description%');
     return Config(
         diffTemplate: diffTemplate,
         tagLinkTemplate: tagLinkTemplate,
         tagTemplate: tagTemplate,
+        releaseCommitTemplate: releaseCommitTemplate,
+        logCommitTemplate: logCommitTemplate,
         keepEmptyUnreleased: keepEmptyUnreleased);
   }
 }

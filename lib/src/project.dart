@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:change/change.dart';
 import 'package:cider/src/changelog_file.dart';
 import 'package:cider/src/cli/config.dart';
+import 'package:cider/src/cli/git/git.dart';
 import 'package:cider/src/pubspec_file.dart';
 import 'package:cider/src/replace_version.dart';
 import 'package:markdown/markdown.dart';
@@ -14,11 +15,13 @@ import 'package:version_manipulation/mutations.dart' as m;
 class Project {
   Project(String projectRoot, this._config)
       : _pubspec = pubspecFile(projectRoot),
-        _changelog = changelogFile(projectRoot);
+        _changelog = changelogFile(projectRoot),
+        _git = Git(Directory(projectRoot));
 
   final File _pubspec;
   final File _changelog;
   final Config _config;
+  final Git _git;
 
   /// Reads the project version from the pubspec.yaml.
   Future<Version> getVersion() => _readPubspec().then((it) => it.version!);
@@ -184,5 +187,43 @@ class Project {
     await _changelog.writeAsString(
         rendered + (_config.changelogNewline ? '\n' : ''),
         flush: true);
+  }
+
+  Future<void> _commit(String message) {
+    return _git.commit(message).exec();
+  }
+
+  Future<void> _stageFiles(List<File> files, {required String scope}) async {
+    if (scope == 'all') {
+      await _git.addAll().exec();
+    } else if (scope == 'staged') {
+      await _git.addFiles(files).exec();
+    } else if (scope == 'cli') {
+      await _git.removeStaged().exec();
+      await _git.addFiles(files).exec();
+    } else {
+      throw ArgumentError.value(scope, 'scope', 'Invalid scope');
+    }
+  }
+
+  Future<void> _tag(String name) {
+    return _git.tag(name, annotated: false).exec();
+  }
+
+  Future<void> tagRelease() async {
+    final version = await getVersion();
+    await _tag(_config.tagTemplate.render(version));
+  }
+
+  Future<void> commitRelease({required String scope}) async {
+    await _stageFiles([_pubspec, _changelog], scope: scope);
+    final version = await getVersion();
+    await _commit(_config.releaseCommitTemplate.render(version));
+  }
+
+  Future<void> commitLog(String type, String description,
+      {required String scope}) async {
+    await _stageFiles([_changelog], scope: scope);
+    await _commit(_config.logCommitTemplate.render(type, description));
   }
 }
